@@ -6,3 +6,56 @@ import warnings
 warnings.simplefilter('ignore')
 data = pd.read_csv('Transformed_Housing_Data2.csv')
 data.head()
+data['mean_sales'] = data['Sale_Price'].mean()
+data['mean_sales'].head()
+## 1. To create "floor_mean" column
+data['floor_mean'] = data['No of Floors'].mean()
+data['floor_mean'].head()
+## Using pandas.pivot_table() to calculate the "floor_mean"
+
+
+floor_mean = data.pivot_table(values=['Sale_Price'],columns='No of Floors',aggfunc=np.mean)
+floor_mean
+
+# making new column
+data['floor_mean'] = 0
+# for every unique floor_mean, fill its mean price in new column "floor_mean"
+for i in floor_mean.columns:
+
+        data['floor_mean'][data['No of Floors']==i]=floor_mean[i][0]
+
+data['floor_mean'].head()
+
+#2. To compare the residual plots of overall "mean_sales" and "floor_mean".
+## Calculating residuals floor_mean_difference and mean_difference
+mean_difference = data['mean_sales']-data['Sale_Price']
+floor_mean_difference =data['floor_mean']-data['Sale_Price']
+mean_difference.size, floor_mean_difference.size
+
+## Plotting the Residuals for comparison
+
+k = range(0, len(data)) # for x axis
+l = [0 for i in range(len(data))] # for regression line in residual plot
+
+plt.figure( figsize = (15,6), dpi =100)
+
+################## plot for Overall Mean ####################
+plt.subplot(1,2,1)
+#code to create the residual of mean regression model along with regression line
+plt.scatter(k,mean_difference,color='red',label='Residuals',s=2)
+plt.plot(k,l,color='green',label='mean regression',linewidth=3)
+plt.xlabel('Fitted points')
+plt.ylabel("Residuals")
+plt.title('Residuals with respect to Overall Mean')
+
+
+################## plot for Overall Mean ####################
+plt.subplot(1,2,2)
+#code to create the residual of floor mean regression model along with regression line
+plt.scatter(k,floor_mean_difference,color='red',label='Residuals',s=2)
+plt.plot(k,l,color='green',label=' mean regression',linewidth=3)
+plt.xlabel('Fitted points')
+plt.ylabel("Residuals")
+plt.title("Residuals with respect to Number of Floors")
+
+plt.legend()
