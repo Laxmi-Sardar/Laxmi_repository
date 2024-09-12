@@ -1,0 +1,625 @@
+Main.py
+import tkinter as tk
+import settings
+import cv2
+from PIL import Image, ImageTk
+import numpy as np
+import imutils
+def start_video():
+ settings.start_video = True
+ show_frame()
+def stop_video():
+ settings.start_video = False
+ settings.start_processing = False
+ lmain.config(image='')
+def start_process():
+ settings.start_processing = True
+def stop_process():
+ settings.start_processing = False
+def show_frame():
+ if not settings.start_video:
+ return None
+ _, frame = cap.read()
+ frame = cv2.flip(frame, 1)
+ frame = imutils.resize(frame, width=400)
+ if settings.start_processing:
+ frame = process_frame(frame)
+ cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+ img = Image.fromarray(cv2image)
+ imgtk = ImageTk.PhotoImage(image=img)
+ lmain.imgtk = imgtk
+ lmain.configure(image=imgtk)
+ lmain.after(10, show_frame)
+def process_frame(img):
+ # grab the frame dimensions and convert it to a blob
+ (h, w) = img.shape[:2]
+ blob = cv2.dnn.blobFromImage(cv2.resize(img, (300, 300)),
+ 0.007843, (300, 300), 127.5)
+ # pass the blob through the network and obtain the detections and
+ # predictions
+ net.setInput(blob)
+ detections = net.forward()
+ # loop over the detections
+ for i in np.arange(0, detections.shape[2]):
+ # extract the confidence (i.e., probability) associated with
+ # the prediction
+ confidence = detections[0, 0, i, 2]
+ # filter out weak detections by ensuring the `confidence` is
+ # greater than the minimum confidence
+ if confidence > 0.2:
+ # extract the index of the class label from the
+ # `detections`, then compute the (x, y)-coordinates of
+ # the bounding box for the object
+ idx = int(detections[0, 0, i, 1])
+ box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+ (startX, startY, endX, endY) = box.astype("int")
+ # draw the prediction on the frame
+ label = "{}: {:.2f}%".format(CLASSES[idx],
+ confidence * 100)
+ cv2.rectangle(img, (startX, startY), (endX, endY),
+ COLORS[idx], 2)
+ y = startY - 15 if startY - 15 > 15 else startY + 15
+ cv2.putText(img, label, (startX, y),
+ cv2.FONT_HERSHEY_SIMPLEX, 0.5, COLORS[idx], 2)
+ return img
+CLASSES = ["background", "aeroplane", "bicycle", "bird", "boat",
+ "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
+ "dog", "Paper", "motorbike", "person", "pottedplant", "sheep",
+ "sofa", "Pen", "tvmonitor","mobile","pen"]
+COLORS = np.random.uniform(0, 255, size=(len(CLASSES), 3))
+# load our serialized model from disk
+print("Loading model...")
+net = cv2.dnn.readNetFromCaffe('MobileNetSSD_deploy.prototxt.txt',
+'MobileNetSSD_deploy.caffemodel')
+cap = cv2.VideoCapture(0)
+window = tk.Tk()
+window.title("OBJECT")
+window.geometry('1366x768')
+image=Image.open("2.jpg")
+photo=ImageTk.PhotoImage(image,width=700,height=420)
+l=tk.Label(window,image=photo)
+l.place(x=0,y=0)
+lbl = tk.Label(window, text="Object Detection", font=("Arial Bold", 24))
+lbl.grid(column=1, row=0)
+imageFrame = tk.Frame(window, width=600, height=500)
+imageFrame.grid(row=1, column=1, padx=10, pady=2)
+lmain = tk.Label(imageFrame, text="Press Start Video")
+lmain.grid(row=1, column=1)
+startVideoStreamBtn = tk.Button(window, text="Start Video",bg="red", command=start_video)
+startVideoStreamBtn.grid(column=0, row=2, padx=15)
+stopVideoStreamBtn = tk.Button(window, text="Stop Video",bg="red", command=stop_video)
+stopVideoStreamBtn.grid(column=0, row=3, padx=15)
+startProcessBtn = tk.Button(window, text="Start Detection",bg="red", command=start_process)
+startProcessBtn.grid(column=1, row=2)
+stopProcessBtn = tk.Button(window, text="Stop Detection",bg="red", command=stop_process)
+stopProcessBtn.grid(column=1, row=3)
+stopProcessBtn = tk.Button(window, text="Exit",bg="red", command=window.destroy)
+stopProcessBtn.grid(column=1, row=4)
+window.mainloop()
+welcome.py
+from tkinter import*
+from PIL import Image,ImageTk
+rt=Tk()
+rt.title('Welcome page')
+rt.geometry('1290x800+150+0')
+rt.maxsize(1290,800)
+rt.minsize(1290,800)
+#--------function---------
+def btn1():
+ rt.destroy()
+ import main
+#-------background---------
+img=Image.open("D:\python project\object detection\images\wallpaper2you_245333.jpg")
+photo=ImageTk.PhotoImage(img)
+b_img=Label(rt,image=photo)
+b_img.place(x=0,y=0)
+title=Label(rt,text="WELCOME!",font="Castellar 45 bold",bg="#3ba5d7",fg="white")
+title.place(x=450,y=40)
+title=Label(rt,text='\n Hi! Object Detection is to find the location of an object in a given picture
+accurately and mark the object with the appropriate category. To be precise, the problem that
+object detection seeks to solve involves determining where the object is, and what it is. However,
+solving this problem is not easy \n', wraplength="1300",bg="#2e7cba",fg="black",font="century
+20 bold")
+title.place(x=10,y=170)
+pic=Image.open("360_F_400911587_8hmMcZE9Soxm5LS8xa9XbgyrHBc65334.jpg")
+Photo=ImageTk.PhotoImage(pic)
+l=Label(rt,text="object Detection----",bg="#204490",fg="white",font="Calibri 18 bold" )
+l.place(x=100, y=500)
+b1=Button(rt,text="main_page",bg="#20418e",command=btn1)
+b1.place(x=180,y=555)
+rt.mainloop()
+register2.py
+from tkinter import *
+import re
+import pymysql
+from PIL import Image, ImageTk
+import tkinter.messagebox as MessageBox
+from tkinter.ttk import Combobox
+t=Tk()
+t.title("Registration page")
+t.geometry('1366x768')
+t.maxsize(1366,768)
+t.minsize(1366,768)
+f=()
+#--------BACKGROUND DETAILS---------------
+img=Image.open("img5.jpg")
+photo=ImageTk.PhotoImage(img)
+b_img=Label(t,image=photo)
+b_img.place(x=0,y=0)
+def reg_ex(e):
+ if(re.search("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9.-]+$", e.get())):
+ return False
+ else:
+ return True
+#--------------function---------------------------------------------------------
+
+def register():
+
+ if(f.get=="" or l.get()=="" or e.get()=="" or p.get()=="" or c.get()==""or s.get()==""or a.get()==""):
+ MessageBox.showerror("ERROR","Please fill all the Fields")
+
+ elif(p.get()!=c.get()):
+ MessageBox.showerror("ERROR","Password and Confirmed Password should be same")
+ elif(reg_ex(e)):
+ MessageBox.showerror("ERROR","email format are incorrect")
+
+ else:
+ first=f.get()
+ last=l.get()
+ email = e.get()
+ pas=p.get()
+ cpass=c.get()
+ seqq=s.get()
+ answer=a.get()
+ mycon = pymysql.connect(host="localhost",user="root",password="",db="regst")
+ mycur = mycon.cursor()
+ mycur.execute("insert into student(first,last,email,pas,cpass,seqq,answer)
+values('"+first+"','"+last+"','"+email+"','"+pas+"','"+cpass+"','"+seqq+"','"+answer+"')")
+ mycon.commit()
+ mycon.close()
+ if(mycon):
+ MessageBox.showinfo("SUCCESS","Registered Succesfully")
+ t.destroy()
+ import login2
+ #else:
+ # MessageBox.showerror("ERROR","Not Registered")
+
+
+def reset():
+ f.set("")
+ l.set("")
+ e.set("")
+ p.set("")
+ c.set("")
+ a.set("")
+def back():
+ t.destroy()
+ import login2
+#----------registration details---------------
+f=StringVar()
+l=StringVar()
+e=StringVar()
+p=StringVar()
+c=StringVar()
+s=StringVar()
+a=StringVar()
+f1=Frame(t,bg="#ffffcc")
+f1.place(x=550,y=50,height=500,width=720)
+name=Label(t,text="REGISTER HERE !",font="century 25 bold",bg="#ffff80",fg="blue")
+name.place(x=730,y=90)
+l1=Label(t,text="First Name",font="Calibri 20",bg="#ffffcc")
+l1.place(x=600,y=140)
+t_l1=Entry(t,font="arial 15",bd=2,width=20,bg="#cccccc",textvariable=f)
+t_l1.place(x=600,y=180)
+l2=Label(t,text="Last Name",font="Calibri 20",bg="#ffffcc")
+l2.place(x=950,y=140)
+t_l2=Entry(t,font="arial 15",bd=2,width=20,bg="#cccccc",textvariable=l)
+t_l2.place(x=950,y=180)
+l3=Label(t,text="Email",font="Calibri 20",bg="#ffffcc")
+l3.place(x=600,y=220)
+t_l3=Entry(t,font="arial 15",bd=2,width=20,bg="#cccccc",textvariable=e)
+t_l3.place(x=600,y=260)
+l4=Label(t,text="Password",font="Calibri 20",bg="#ffffcc")
+l4.place(x=950,y=220)
+t_l4=Entry(t,font=f"arial 15",bd=2,width=20,bg="#cccccc",textvariable=p)
+t_l4.place(x=950,y=260)
+l5=Label(t,text="Confirm password",font="Calibri 20",bg="#ffffcc")
+l5.place(x=600,y=300)
+t_l5=Entry(t,font="arial 20",bd=2,width=20,bg="#cccccc",textvariable=c)
+t_l5.place(x=600,y=340)
+l6=Label(t,text="Sequrity question",font="Calibri 20 ",bg="#ffffcc")
+l6.place(x=600,y=390)
+l61=["what is your pet name","what is your favourite game"]
+l62=Combobox(t,values=l61,textvariable=s)
+l62.place(x=800,y=400,width=170)
+l7=Label(t,text="Answer",font="Calibri 20 ",bg="#ffffcc")
+l7.place(x=990,y=360)
+t_71=Entry(t,bd=2,width=30,textvariable=a)
+t_71.place(x=990,y=400)
+b1=Button(t,text="Register",font=("century
+15"),width=18,bg="#99b3ff",command=register,fg="white")
+b1.place(x=550,y=480, height=60)
+b2=Button(t,text="Reset",command=reset,font=("century 20"),width=13,bg="#99b3ff",fg="white")
+b2.place(x=800,y=480)
+b3=Button(t,text="Back",font=("century 20"),width=13,bg="#99b3ff",fg="white",command=back)
+b3.place(x=1040,y=480)
+t.mainloop()
+register.py
+from tkinter import *
+import re
+import pymysql
+from PIL import Image, ImageTk
+import tkinter.messagebox as MessageBox
+t=Tk()
+t.title("Registration page")
+t.geometry('1366x768')
+t.maxsize(1366,768)
+t.minsize(1366,768)
+f=()
+#--------BACKGROUND DETAILS---------------
+img=Image.open("img5.jpg")
+photo=ImageTk.PhotoImage(img)
+b_img=Label(t,image=photo)
+b_img.place(x=0,y=0)
+def reg_ex(e):
+ if(re.search("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+\.[a-zA-Z0-9.-]+$", e.get())):
+ return False
+ else:
+ return True
+#--------------function------------
+def register():
+
+ if(f.get=="" or l.get()=="" or e.get()=="" or p.get()=="" or c.get()==""):
+ MessageBox.showerror("ERROR","Please fill all the Fields")
+
+ elif(p.get()!=c.get()):
+ MessageBox.showerror("ERROR","Password and Confirmed Password should be same")
+ elif(reg_ex(e)):
+ MessageBox.showerror("ERROR","email format are incorrect")
+
+ else:
+ first=f.get()
+ last=l.get()
+ email = e.get()
+ pas=p.get()
+ cpas=c.get()
+ mycon = pymysql.connect(host="localhost",user="root",password="",db="regst")
+ mycur = mycon.cursor()
+ mycur.execute("insert into student(first,last,email,pas,cpas)
+values('"+first+"','"+last+"','"+email+"','"+pas+"','"+cpas+"')")
+ mycon.commit()
+ mycon.close()
+ if(mycon):
+ MessageBox.showinfo("SUCCEsS","Registered Succesfully")
+ t.destroy()
+ import login
+ #else:
+ # MessageBox.showerror("ERROR","Not Registered")
+
+
+def reset():
+ f.set("")
+ l.set("")
+ e.set("")
+ p.set("")
+ c.set("")
+def back():
+ t.destroy()
+ import login
+#----------registration details---------------
+f=StringVar()
+l=StringVar()
+e=StringVar()
+p=StringVar()
+c=StringVar()
+f1=Frame(t,bg="#ffffcc")
+f1.place(x=550,y=50,height=500,width=720)
+name=Label(t,text="REGISTER HERE !",font="century 25 bold",bg="#ffff80",fg="blue")
+name.place(x=730,y=90)
+l1=Label(t,text="First Name",font="Calibri 20",bg="#ffffcc")
+l1.place(x=700,y=160)
+t_l1=Entry(t,font="arial 20",bd=2,width=20,bg="#cccccc",textvariable=f)
+t_l1.place(x=850,y=160)
+l2=Label(t,text="Last Name",font="Calibri 20",bg="#ffffcc")
+l2.place(x=700,y=210)
+t_l2=Entry(t,font="arial 20",bd=2,width=20,bg="#cccccc",textvariable=l)
+t_l2.place(x=850,y=210)
+l3=Label(t,text="Email",font="Calibri 20",bg="#ffffcc")
+l3.place(x=700,y=260)
+t_l3=Entry(t,font="arial 20",bd=2,width=20,bg="#cccccc",textvariable=e)
+t_l3.place(x=850,y=260)
+l4=Label(t,text="Password",font="Calibri 20",bg="#ffffcc")
+l4.place(x=700,y=310)
+t_l4=Entry(t,font=f"arial 20",bd=2,width=20,bg="#cccccc",textvariable=p)
+t_l4.place(x=850,y=310)
+l5=Label(t,text="Confirm password",font="Calibri 20",bg="#ffffcc")
+l5.place(x=640,y=360)
+t_l5=Entry(t,font="arial 20",bd=2,width=20,bg="#cccccc",textvariable=c)
+t_l5.place(x=850,y=360)
+b1=Button(t,text="Register",font=("century
+19"),width=18,bg="#99b3ff",command=register,fg="white")
+b1.place(x=790,y=410)
+b2=Button(t,text="Reset",command=reset,font=("century 20"),width=13,bg="#99b3ff",fg="white")
+b2.place(x=650,y=480)
+b3=Button(t,text="Back",font=("century 20"),width=13,bg="#99b3ff",fg="white",command=back)
+b3.place(x=1000,y=480)
+t.mainloop()
+plot1.py
+'''
+import matplotlib.pyplot as plt
+x=[12,33,44,89]
+y=[34,11,67,39]
+plt.plot(x,y,color="red",linestyle="dashdot") # dashed/dotted/dashdot
+plt.xlabel("volume")
+plt.ylabel("temp")
+plt.title("volume vs temp")
+#plt.grid(True,color="green")
+plt.grid(True,color="green",axis="x")
+plt.show()
+# pip install matplotlib
+'''
+'''
+import matplotlib.pyplot as plt
+x=[12,33,44,89]
+y=[34,11,67,39]
+plt.plot(x,y,"bo")
+plt.xlabel("volume")
+plt.ylabel("temp")
+plt.title("volume vs temp")
+plt.show()
+'''
+'''
+import matplotlib.pyplot as plt
+x=[12,33,44,89]
+y=[34,11,67,39]
+plt.scatter(x,y,color=["red","green","blue","magenta"],sizes=[12,50,40,90])
+plt.xlabel("volume")
+plt.ylabel("temp")
+plt.title("volume vs temp")
+plt.show()
+'''
+'''
+import matplotlib.pyplot as plt
+x=[12,33,44,89]
+y=[34,11,67,39]
+plt.plot(x,y,color="green")
+plt.scatter(x,y,color="red")
+plt.xlabel("volume")
+plt.ylabel("temp")
+plt.title("volume vs temp")
+plt.show()
+'''
+'''
+import matplotlib.pyplot as plt
+x1=[12,33,44,89]
+y1=[34,11,67,39]
+x2=[67,34,21,89]
+y2=[24,66,55,90]
+plt.plot(x1,y1,color="red",label="india")
+plt.plot(x2,y2,color="green",label="china")
+plt.xlabel("volume")
+plt.ylabel("temp")
+plt.legend()
+plt.title("india vs china")
+plt.show()
+'''
+import matplotlib.pyplot as plt
+age=[23,55,66,11,90,56]
+city=['ranchi','tata','patna','dhanbad','bokaro','ramgarh']
+plt.barh(city,age,color=["yellow","blue","pink","tomato"])
+plt.grid(True,color="green")
+plt.show()
+login2.py
+from tkinter import *
+import pymysql
+from PIL import Image, ImageTk
+import tkinter.messagebox as MessageBox
+from tkinter.ttk import Combobox
+import mysql.connector as mysql
+root=Tk()
+root.title('Login page')
+root.geometry('1366x768')
+root.maxsize(1366,768)
+root.minsize(1366,768)
+f=("Calibri 25")
+#--------function-------
+def forget():
+ pass
+
+def register():
+ root.destroy()
+ import register2
+def login():
+ if(e1.get()=="" or e2.get()==""):
+ MessageBox.showerror("ERROR","Please fill all the Fields")
+ else:
+ mycon = pymysql.connect(host="localhost",user="root",password="",db="regst")
+ mycur = mycon.cursor()
+ mycur.execute("select * from student where email=%s and pas=%s",(e1.get(),e2.get()))
+ row=mycur.fetchone()
+ if(row==None):
+ MessageBox.showerror("ERROR","Invalid Email or Password")
+ else:
+ MessageBox.showinfo("SUCCESS","Successfully Logged In")
+ root.destroy()
+ import welcome
+ mycon.close()
+#--------BACKGROUND DETAILS---------------
+img=Image.open("img5.jpg")
+photo=ImageTk.PhotoImage(img)
+b_img=Label(root,image=photo)
+b_img.place(x=0,y=0)
+#---------frame----------------
+f1=Frame(root,bg="red")
+f1.place(x=550,y=50,height=500,width=720)
+#-------LOGO----------
+logo=Image.open("det4.jpg")
+photo1=ImageTk.PhotoImage(logo)
+icon=Label(root,image=photo1)
+icon.place(x=550,y=50,height=500,width=300)
+c1=Label(root,text="OBJECT DETECTION",fg="black",font="Calibri 17",bg="blue")
+c1.place(x=600,y=100)
+#----------login details-------
+name=Label(root,text="LOGIN HERE !",font="century 25 bold",bg="red",fg="blue")
+name.place(x=900,y=80)
+uname=Label(root,text="Email",font=f,bg="red")
+uname.place(x=850,y=160)
+e1=Entry(root,bd=5,font="arial 20",width=25,bg="#cccccc")
+e1.place(x=850,y=210)
+upass=Label(root,text="Password",font=f,bg="red")
+upass.place(x=850,y=280)
+e2=Entry(root,bd=5,font="arial 20",width=25,bg="#cccccc")
+e2.place(x=850,y=330)
+login=Button(root,text="SIGN IN",font=("century
+15"),width=10,bg="#000066",fg="white",command=login)
+login.place(x=850,y=400)
+l1=Label(root,text="Don't have an account?",fg="black",font="Calibri 17",bg="red")
+l1.place(x=850,y=500)
+regs=Button(root,text="REGISTER",font=("Calibri
+15"),width=10,bg="#0000ff",fg="white",command=register)
+regs.place(x=1100,y=500)
+fgt=Button(root,text="forget password?",font=("Calibri
+15"),width=20,bg="red",fg="blue",command=forget)
+fgt.place(x=1030,y=400)
+root.mainloop()
+login.py
+from tkinter import *
+import pymysql
+from PIL import Image, ImageTk
+import tkinter.messagebox as MessageBox
+root=Tk()
+root.title('Login page')
+root.geometry('1366x768')
+root.maxsize(1366,768)
+root.minsize(1366,768)
+f=("Calibri 25")
+#--------function-------
+def register():
+ root.destroy()
+ import register
+def login():
+ if(e1.get()=="" or e2.get()==""):
+ MessageBox.showerror("ERROR","Please fill all the Fields")
+ else:
+ mycon = pymysql.connect(host="localhost",user="root",password="",db="regst")
+ mycur = mycon.cursor()
+ mycur.execute("select * from student where email=%s and pas=%s",(e1.get(),e2.get()))
+ row=mycur.fetchone()
+ if(row==None):
+ MessageBox.showerror("ERROR","Invalid Email or Password")
+ else:
+ MessageBox.showinfo("SUCCESS","Successfully Logged In")
+ root.destroy()
+ import welcome
+ mycon.close()
+#--------BACKGROUND DETAILS---------------
+img=Image.open("D:\python project\object detection\img5.jpg")
+photo=ImageTk.PhotoImage(img)
+b_img=Label(root,image=photo)
+b_img.place(x=0,y=0)
+#---------frame----------------
+f1=Frame(root,bg="red")
+f1.place(x=550,y=50,height=500,width=720)
+#-------LOGO----------
+logo=Image.open("D:\python project\object detection\det4.jpg")
+photo1=ImageTk.PhotoImage(logo)
+icon=Label(root,image=photo1)
+icon.place(x=550,y=50,height=500,width=300)
+c1=Label(root,text="OBJECT DETECTION",fg="black",font="Calibri 17",bg="blue")
+c1.place(x=600,y=100)
+#----------login details-------
+name=Label(root,text="LOGIN HERE !",font="century 25 bold",bg="red",fg="blue")
+name.place(x=900,y=80)
+uname=Label(root,text="Email",font=f,bg="red")
+uname.place(x=850,y=160)
+e1=Entry(root,bd=5,font="arial 20",width=25,bg="#cccccc")
+e1.place(x=850,y=210)
+upass=Label(root,text="Password",font=f,bg="red")
+upass.place(x=850,y=280)
+e2=Entry(root,bd=5,font="arial 20",width=25,bg="#cccccc")
+e2.place(x=850,y=330)
+login=Button(root,text="SIGN IN",font=("century
+20"),width=13,bg="#000066",fg="white",command=login)
+login.place(x=850,y=400)
+l1=Label(root,text="Don't have an account?",fg="black",font="Calibri 17",bg="red")
+l1.place(x=850,y=500)
+regs=Button(root,text="REGISTER",font=("Calibri
+15"),width=10,bg="#0000ff",fg="white",command=register)
+regs.place(x=1100,y=500)
+root.mainloop()
+global.py
+'''
+x=12
+def call():
+ print("x is ",x)
+print(x)
+call()
+'''
+'''
+x=12 # global variable
+def call():
+ x=15 # local variable
+ print("x is ",x)
+call()
+print(x)
+'''
+x=13
+def hello():
+ global x
+ x=100
+ print("x is ",x)
+hello()
+print(x)
+forget.py
+from tkinter import *
+import re
+import mysql.connector as mysql
+import tkinter
+import pymysql
+from PIL import Image, ImageTk
+import tkinter.messagebox as MessageBox
+from tkinter.ttk import Combobox
+'''
+def forget():
+ #if e1.get()=="":
+ # MessageBox.showerror("error","plese enter email address")
+ if():
+ mycon = mysql.connect(host="localhost",user="root",password="",db="regst")
+ mycur = mycon.cursor()
+ mycur.execute("update student set password = '"+e1+"' where '"+id+"'")
+ mycur.execute("commit")
+ MessageBox.showinfo("delete status","delete sucessful")
+ else:
+ #if(row==None):
+ MessageBox.showerror("ERROR","Invalid Email or Password")
+
+ mycon.close()
+
+'''
+#--------BACKGROUND DETAILS---------------
+root=tkinter.Tk()
+root.title("forget password")
+root.geometry("400x400+450+150")
+root.configure(bg="light blue")
+root.focus_force()
+root.grab_set()
+
+f2=Label(root,text="Reset password",font="Calibri 20 ",fg="red",bg="light yellow")
+f2.place(x=130,y=10)
+f1=Label(root,text="Sequrity question",font="Calibri 20 ",fg="blue")
+f1.place(x=130,y=70)
+
+l61=["what is your pet name","what is your favourite game"]
+l62=Combobox(root,values=l61)
+l62.place(x=130,y=110,width=170)
+l7=Label(root,text="Answer",font="Calibri 20 ",fg="blue")
+l7.place(x=130,y=150)
+t_71=Entry(root,bd=2,width=30)
+t_71.place(x=130,y=190)
+
+l8=Label(root,text="new password",font="Calibri 20 ",fg="blue")
+l8.place(x=130,y=230)
+t_81=Entry(root,bd=2,width=30)
+t_81.place(x=130,y=270)
+root.mainloop()
+*****
